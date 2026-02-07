@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Trip Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="icon" href="data:,">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, sans-serif;
+    }
+
+    body {
+      background: #0f0f14;
+      color: #f1f1f1;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 800px;
+      background: #171721;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.6);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 28px;
+      background: linear-gradient(90deg, #6ee7ff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    input {
+      flex: 1;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      background: #0f0f14;
+      color: #fff;
+    }
+
+    button {
+      padding: 14px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      background: linear-gradient(90deg, #6ee7ff, #a78bfa);
+      color: #000;
+      font-weight: bold;
+    }
+
+    .loading {
+      text-align: center;
+      margin: 20px 0;
+      display: none;
+      color: #a1a1aa;
+    }
+
+    .output {
+      margin-top: 20px;
+      line-height: 1.7;
+    }
+
+    .output h2 {
+      margin-top: 20px;
+      color: #6ee7ff;
+    }
+
+    .output ul {
+      margin-left: 20px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app">
+    <h1>🌍 AI Trip Planner</h1>
+
+    <div class="input-group">
+      <!-- 🔴 THIS ID IS IMPORTANT -->
+      <input
+        id="locationInput"
+        type="text"
+        placeholder="Enter any place (Goa, Paris, Hogenakkal)"
+      >
+      <button onclick="generateTrip()">Generate</button>
+    </div>
+
+    <div class="loading" id="loading">Planning your trip… ✨</div>
+    <div class="output" id="output"></div>
+  </div>
+
+  <script>
+    async function generateTrip() {
+      // ✅ THESE IDS NOW EXIST
+      const locationInput = document.getElementById("locationInput");
+      const output = document.getElementById("output");
+      const loading = document.getElementById("loading");
+
+      const location = locationInput.value.trim();
+
+      if (!location) {
+        alert("Please enter a location");
+        return;
+      }
+
+      loading.style.display = "block";
+      output.innerHTML = "";
+
+      const prompt = `
+Create a destination-specific travel plan for "${location}".
+
+Include:
+- Type of place
+- Top attractions
+- Local food
+- Best time to visit
+- Budget (low/medium/high with cost)
+- Budget breakdown (travel, stay, food, transport)
+- Transportation tips
+- 2–3 safety tips
+`;
+
+      try {
+        const response = await fetch("/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt }),
+        });
+
+        const data = await response.json();
+        console.log("FULL RESPONSE:", data);
+
+        if (!data.text) {
+          throw new Error(data.error || "No response from AI");
+        }
+
+        output.innerHTML = formatText(data.text);
+
+      } catch (err) {
+        console.error("ERROR:", err);
+        output.innerHTML =
+          "<p style='color:#f87171'>❌ Failed to generate trip.</p>";
+      }
+
+      loading.style.display = "none";
+    }
+
+    function formatText(text) {
+      return text
+        .replace(/^## (.*$)/gm, "<h2>$1</h2>")
+        .replace(/^- (.*$)/gm, "<li>$1</li>")
+        .replace(/(<li>.*<\/li>)/gs, "<ul>$1</ul>")
+        .replace(/\n/g, "<br>");
+    }
+  </script>
+
+</body>
+</html>
