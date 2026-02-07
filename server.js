@@ -6,7 +6,8 @@ const app = express();
 const PORT = 3000;
 
 // 🔑 PASTE YOUR HUGGING FACE TOKEN HERE
-const HF_API_KEY = "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";
+const HF_TOKEN = process.env.HF_TOKEN;
+
 
 // ✅ HUGGING FACE OPENAI-COMPATIBLE ROUTER
 const HF_CHAT_URL = "https://router.huggingface.co/v1/chat/completions";
@@ -52,3 +53,4 @@ app.post("/generate", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Server running at http://localhost:${PORT}`);
 });
+
