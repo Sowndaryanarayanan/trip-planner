@@ -1,19 +1,27 @@
 import express from "express";
 import fetch from "node-fetch";
 import bodyParser from "body-parser";
+import cors from "cors"; // ✅ import cors
 
 const app = express();
 const PORT = 3000;
 
-// 🔑 PASTE YOUR HUGGING FACE TOKEN HERE
+// 🔑 Hugging Face token from environment variable
 const HF_TOKEN = process.env.HF_TOKEN;
 
-
-// ✅ HUGGING FACE OPENAI-COMPATIBLE ROUTER
+// ✅ Hugging Face OpenAI-compatible router
 const HF_CHAT_URL = "https://router.huggingface.co/v1/chat/completions";
 
+// ✅ Middleware
 app.use(bodyParser.json());
 app.use(express.static("."));
+
+// 🔥 Enable CORS for your frontend
+app.use(cors({
+  origin: "https://sowndaryanarayanan.github.io", // allow only your GitHub Pages
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 app.post("/generate", async (req, res) => {
   try {
@@ -23,7 +31,7 @@ app.post("/generate", async (req, res) => {
     const response = await fetch(HF_CHAT_URL, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${HF_API_KEY}`,
+        "Authorization": `Bearer ${HF_TOKEN}`, // ⚡ fixed variable name
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
